@@ -4,7 +4,7 @@ import { authorize } from "../middlewares/role.middleware";
 import { createExperienceRequest, getExperienceByIdRequest, getExperiencesByCityRequest, getNearestExperienceRequest, searchExperienceRequest } from "../controllers/experience.controller";
 import { createExperienceSchema } from "../validators/experience.validator";
 import { validate } from "../middlewares/validate.middleware";
-import { upload } from "../middlewares/uploadProfilePhoto";
+import { uploadProfilePhoto } from "../middlewares/uploadProfilePhoto";
 
 const router = express.Router();
 
@@ -14,7 +14,7 @@ router.post(
     authenticate,
     // authorize("ADMIN"),
     validate(createExperienceSchema),
-    upload.single("experiencePhoto"),
+    uploadProfilePhoto.single("experiencePhoto"),
     createExperienceRequest
 );
 

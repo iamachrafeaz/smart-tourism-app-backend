@@ -14,7 +14,7 @@ const guideSchema = new mongoose.Schema({
   expertise: [{ type: String }],
   responseTime: Number,
   isAvailable: Boolean,
-  isVerified: Boolean
+  isVerified: Boolean,
 });
 
 

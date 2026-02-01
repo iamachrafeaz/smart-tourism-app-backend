@@ -12,12 +12,8 @@ const userSchema = new mongoose.Schema(
         address: String,
         country: String,
         profilePictureUrl: String,
-        verificationCode: Number,
-        verificationCodeExpires: Date,
         role: { type: String, enum: UserRoleEnum, required: false },
-        isComplete: { type: Boolean, default: false },
         isActive: { type: Boolean, default: true },
-        isVerified: { type: Boolean, default: false },
     },
     { timestamps: true }
 );

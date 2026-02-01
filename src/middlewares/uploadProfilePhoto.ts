@@ -1,24 +1,18 @@
 import multer from "multer";
 import path from "path";
-import fs from "fs";
+import fs from 'fs'
 
 const storage = multer.diskStorage({
     destination: (req: any, file, cb) => {
-        let folder = "others";
-
-        if (file.fieldname === "profilePhoto") folder = "profile";
-        if (file.fieldname === "experiencePhoto") folder = "experience";
-
-        const uploadPath = `uploads/${folder}`;
-
-        fs.mkdirSync(uploadPath, { recursive: true });
-
+        const uploadPath = "uploads/profile";
+        if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+        }
         cb(null, uploadPath);
     },
-
     filename: (req: any, file, cb) => {
         const ext = path.extname(file.originalname);
-        cb(null, `${file.fieldname}-${req.user.id}-${Date.now()}${ext}`);
+        cb(null, `${file.fieldname}-${Date.now()}${ext}`);
     }
 });
 
@@ -27,7 +21,7 @@ const fileFilter = (req: any, file: Express.Multer.File, cb: any) => {
     else cb(new Error("Only images allowed"), false);
 };
 
-export const upload = multer({
+export const uploadProfilePhoto = multer({
     storage,
     fileFilter,
     limits: { fileSize: 5 * 1024 * 1024 }

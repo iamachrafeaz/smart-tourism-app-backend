@@ -3,11 +3,14 @@ import {
     registerRequest,
     loginRequest,
     checkVerificationCodeRequest,
-    resendVerificationCodeRequest
+    resendVerificationCodeRequest,
+    completeProfileRequest,
+    chooseUserRoleRequest
 } from "../controllers/auth.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { loginSchema, registerSchema } from "../validators/auth.validator";
+import { uploadProfilePhoto } from "../middlewares/uploadProfilePhoto";
 
 const router = Router();
 
@@ -17,7 +20,7 @@ const router = Router();
  * @access  Public
  */
 router.post(
-    "/register",
+    "/register/start",
     validate(registerSchema),
     registerRequest
 );
@@ -36,24 +39,44 @@ router.post(
 /**
  * @route   POST /api/auth/verify
  * @desc    Verify email with code
- * @access  Protected (JWT)
  */
 router.post(
-    "/verify",
-    authenticate,
+    "/register/verify-email",
     checkVerificationCodeRequest
 );
 
 /**
  * @route   POST /api/auth/resend-code
  * @desc    Resend verification code
- * @access  Protected (JWT)
  */
 router.post(
-    "/resend-code",
-    authenticate,
+    "/register/resend-otp",
     resendVerificationCodeRequest
 );
+
+router.post(
+    "/register/profile",
+    uploadProfilePhoto.single("profilePhoto"),
+    completeProfileRequest
+);
+
+router.post(
+    "/register/choose-role",
+    chooseUserRoleRequest
+);
+
+router.post(
+    "/test-upload",
+    uploadProfilePhoto.single("profilePhoto"),
+    async (req: any, res: any) => {
+        const profilePhoto = req.file;
+        const data = JSON.parse(req.body.data);
+        console.log(profilePhoto.path);
+        console.log(data);
+        res.json({ data })
+    }
+);
+
 
 router.get(
     "/test-token",

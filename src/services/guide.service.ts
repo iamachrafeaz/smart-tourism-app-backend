@@ -6,7 +6,8 @@ import { getTopReviewsByGuide } from "./review.service";
 
 export const createGuide = async (userId: string) => {
     return await Guide.create({
-        user: userId
+        user: userId,
+        isVerified: false,
     })
 }
 

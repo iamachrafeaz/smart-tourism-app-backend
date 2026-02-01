@@ -5,6 +5,11 @@ export const ERRORS = {
         message: "User not found",
         status: 404,
     },
+    INVALID_ROLE: {
+        code: "INVALID_ROLE",
+        message: "Invalide Role",
+        status: 404
+    },
     USER_ALREADY_VERIFIED: {
         code: "USER_ALREADY_VERIFIED",
         message: "User already verified",
@@ -14,6 +19,16 @@ export const ERRORS = {
         code: "EMAIL_ALREADY_EXISTS",
         message: "Email already exists",
         status: 409,
+    },
+    EMAIL_NOT_VERIFIED: {
+        code: "EMAIL_NOT_VERIFIED",
+        message: "Email is not verified",
+        status: 409,
+    },
+    INVALID_STEP: {
+        code: "INVALID_STEP",
+        message: "Invalid step",
+        status: 404,
     },
 
     // Guide
@@ -82,13 +97,13 @@ export const ERRORS = {
     },
 
     // 📩 Verification
-    CODE_EXPIRED: {
-        code: "CODE_EXPIRED",
+    OTP_EXPIRED: {
+        code: "OTP_EXPIRED",
         message: "Verification code expired",
         status: 410,
     },
-    CODE_INCORRECT: {
-        code: "CODE_INCORRECT",
+    OTP_INCORRECT: {
+        code: "OTP_INCORRECT",
         message: "Verification code is incorrect",
         status: 400,
     },
@@ -107,6 +122,11 @@ export const ERRORS = {
     EMAIL_INVALID: {
         code: "EMAIL_INVALID",
         message: "Email format is invalid",
+        status: 400,
+    },
+    EMAIL_ALREADY_VERIFIED: {
+        code: "EMAIL_ALREADY_VERIFIED",
+        message: "Email is already verified",
         status: 400,
     },
     PASSWORD_TOO_WEAK: {

@@ -58,3 +58,6 @@ dist/
 
 # Mac system files
 .DS_Store
+
+/uploads
+/uploads/*
