@@ -1,14 +1,17 @@
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import Guide from "../models/guide.model";
 import Review from "../models/review.model";
 import Tour from "../models/tour.model";
 import { getTopReviewsByGuide } from "./review.service";
+import ApiError from "../utils/ApiError";
+import { ERRORS } from "../../constants/error.constants";
+import cityModel from "../models/city.model";
 
 export const createGuide = async (userId: string) => {
     return await Guide.create({
         user: userId,
-        isVerified: false,
-    })
+        verificationStatus: "UNVERIFIED",
+    });
 }
 
 export const completeGuideProfile = async (
@@ -17,15 +20,38 @@ export const completeGuideProfile = async (
     description: string,
     expertise: string[],
     fee: number,
-    city: string
+    city: string,
+    selfiePath: string | null,
+    idPath: string | null,
+    certifications: string[] | null,
+
 ) => {
-    return await Guide.findOneAndUpdate({ user: userId }, {
-        fee,
-        city,
+
+    const user = await Guide.findOne({ user: userId });
+    if (!user) throw new ApiError(ERRORS.USER_NOT_FOUND);
+    if (user.verificationStatus !== "UNVERIFIED") throw new ApiError(ERRORS.INVALID_STEP);
+
+    if (selfiePath == null || idPath == null || certifications == null) {
+        throw new ApiError(ERRORS.DOCUMENTS_REQUIRED)
+    }
+
+    const cityObj = await cityModel.findOne({ name: city });
+
+    user.set({
+        certifications: certifications.map(c => ({ url: c, verificationStatus: "PENDING" })),
+        city: cityObj,
+        verificationStatus: "PENDING",
+        idPath: { url: idPath, verificationStatus: "PENDING" },
+        selfiePath: { url: selfiePath, verificationStatus: "PENDING" },
         languages,
+        fee,
+        expertise,
         description,
-        expertise
     });
+
+    await user.save();
+
+    return
 }
 
 

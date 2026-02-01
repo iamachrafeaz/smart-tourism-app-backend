@@ -72,6 +72,11 @@ export const ERRORS = {
         message: "Coordinates are out of valid range",
         status: 400,
     },
+    DOCUMENTS_REQUIRED: {
+        code: "DOCUMENTS_REQUIRED",
+        message: "Documents are required",
+        status: 400
+    },
 
 
     // 🔑 Auth / Login
