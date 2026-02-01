@@ -2,7 +2,8 @@ import { Router } from "express";
 import {
     completeAccountRequest,
     chooseUserRoleRequest,
-    updateProfilePhotoRequest
+    updateProfilePhotoRequest,
+    getMeRequest
 } from "../controllers/user.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validate.middleware";
@@ -13,6 +14,12 @@ import {
 import { upload } from "../middlewares/uploadProfilePhoto";
 
 const router = Router();
+
+router.get(
+    "/me",
+    authenticate,
+    getMeRequest
+);
 
 /**
  * @route   POST /api/user/complete-account

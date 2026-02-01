@@ -27,7 +27,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
-app.use("/api/user", userRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/guides", guideRoutes);
 app.use("/api/experiences", experienceRoutes);
 app.use("/api/bookings", bookingRoutes);
@@ -45,9 +45,9 @@ app.use((err: any, req: any, res: any, next: any) => {
         });
     }
     if (err instanceof ApiError) {
-        res.status(err.statusCode).json({ message: err.message });
+        res.status(err.status).json({ success: false, error: err.getErrorObject() });
     } else {
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({ success: false, error: { code: "SERVER_ERROR", message: 'Internal server error' } });
     }
 });
 

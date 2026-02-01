@@ -1,6 +1,7 @@
-import { ZodError, ZodType } from "zod"; // Use ZodType
+import { ZodError, ZodType } from "zod";
 import { Request, Response, NextFunction } from "express";
 import ApiError from "../utils/ApiError";
+import { ERRORS } from "../../constants/error.constants";
 
 export const validate =
   (schema: ZodType) =>
@@ -10,9 +11,16 @@ export const validate =
         next();
       } catch (err: unknown) {
         if (err instanceof ZodError) {
-          next(new ApiError(422, err.issues[0].message));
-        } else {
-          next(new ApiError(500, "Validation failed"));
+          const firstIssue = err.issues[0];
+
+          return next(
+            new ApiError({
+              ...ERRORS.VALIDATION_ERROR,
+              message: firstIssue.message, // override default message
+            })
+          );
         }
+
+        return next(new ApiError(ERRORS.INTERNAL_SERVER_ERROR));
       }
     };

@@ -21,7 +21,7 @@ export const loginRequest = async (req: any, res: any, next: any) => {
 
         res.status(201).json({
             success: true,
-            token
+            token: token
         });
     } catch (err) {
         next(err);

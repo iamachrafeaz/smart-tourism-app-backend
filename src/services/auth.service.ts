@@ -3,12 +3,12 @@ import User from '../models/user.model';
 import ApiError from '../utils/ApiError';
 import { generateToken } from '../utils/jwt';
 import { Transporter } from '../config/mailer.config';
+import { ERRORS } from '../../constants/error.constants';
 
 export const registerService = async (email: string, password: string) => {
-
     const exists = await User.findOne({ email });
     if (exists) {
-        throw new ApiError(409, "EMAIL_ALREADY_EXISTS");
+        throw new ApiError(ERRORS.EMAIL_ALREADY_EXISTS);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -22,46 +22,39 @@ export const registerService = async (email: string, password: string) => {
 
     const token = generateToken({
         id: user._id,
-        role: user.role
-    });
-
-    return token;
-}
-
-export const loginService = async (email: string, password: string) => {
-    const user = await User.findOne({ email });
-    if (!user) throw new ApiError(401, "INVALID_CREDENTIALS");
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) throw new ApiError(401, "INVALID_CREDENTIALS");
-
-    const token = generateToken({
-        id: user._id,
         role: user.role,
     });
 
     return token;
-}
+};
 
+export const loginService = async (email: string, password: string) => {
+    const user = await User.findOne({ email });
+    if (!user) throw new ApiError(ERRORS.INVALID_CREDENTIALS);
 
-export const checkVerificationCode = async (
-    email: string,
-    code: number
-) => {
-    const user = await User.findOne({ email: email });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) throw new ApiError(ERRORS.INVALID_CREDENTIALS);
 
-    if (!user) throw new ApiError(404, "USER_NOT_FOUND");
+    return generateToken({
+        id: user._id,
+        role: user.role,
+    });
+};
 
-    if (user.isVerified) throw new ApiError(400, "USER_ALREADY_VERIFIED");
+export const checkVerificationCode = async (email: string, code: number) => {
+    const user = await User.findOne({ email });
+    if (!user) throw new ApiError(ERRORS.USER_NOT_FOUND);
+
+    if (user.isVerified) throw new ApiError(ERRORS.USER_ALREADY_VERIFIED);
 
     const now = new Date();
 
     if (!user.verificationCodeExpires || user.verificationCodeExpires < now) {
-        throw new ApiError(410, "CODE_EXPIRED")
+        throw new ApiError(ERRORS.CODE_EXPIRED);
     }
 
     if (!user.verificationCode || code.toString() !== user.verificationCode.toString()) {
-        throw new ApiError(409, "CODE_INCORRECT");
+        throw new ApiError(ERRORS.CODE_INCORRECT);
     }
 
     user.verificationCode = undefined;
@@ -70,23 +63,20 @@ export const checkVerificationCode = async (
 
     await user.save();
 
-    const token = generateToken({
+    return generateToken({
         id: user._id,
         role: user.role,
     });
-
-    return token;
-}
+};
 
 export const resendVerificationCode = async (email: string) => {
-    const user = await User.findOne({ email: email });
+    const user = await User.findOne({ email });
 
-    if (!user) throw new ApiError(404, "USER_NOT_FOUND");
-
-    if (user.isVerified) throw new ApiError(400, "USER_ALREADY_VERIFIED");
+    if (!user) throw new ApiError(ERRORS.USER_NOT_FOUND);
+    if (user.isVerified) throw new ApiError(ERRORS.USER_ALREADY_VERIFIED);
 
     await sendVerificationEmail(user);
-}
+};
 
 const sendVerificationEmail = async (user: any) => {
     const code = generateVerificationCode();

@@ -33,7 +33,6 @@ export const getAllGuidesRequest = async (req: any, res: any, next: any) => {
 export const getGuideByIdRequest = async (req: any, res: any, next: any) => {
     try {
         const { id } = req.params;
-        const userRole = "jj";
         const guideProfile = await getGuideById(id);
 
         let responseData;

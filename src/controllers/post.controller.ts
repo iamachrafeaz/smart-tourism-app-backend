@@ -1,6 +1,4 @@
-import * as postService from "../services/post.service"; // adjust path if needed
-
-import ApiError from "../utils/ApiError";
+import * as postService from "../services/post.service";
 import { postDetail, postList } from "../views/post.view";
 
 export const createPostRequest = async (req: any, res: any, next: any) => {
@@ -8,9 +6,6 @@ export const createPostRequest = async (req: any, res: any, next: any) => {
         const userId = req.user.id;
         const { question, tags, topic } = req.body;
 
-        if (!question) {
-            throw new ApiError(400, "MISSING_REQUIRED_FIELDS");
-        }
 
         const post = await postService.createPost({
             userId,

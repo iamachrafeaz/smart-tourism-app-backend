@@ -1,39 +1,37 @@
+import { ERRORS } from "../../constants/error.constants";
 import { PostTagEnum } from "../enums/postTag.enum";
 import { PostTopicEnum } from "../enums/postTopic.enum";
 import postModel from "../models/post.model";
-import User from '../models/user.model'
+import User from "../models/user.model";
 import ApiError from "../utils/ApiError";
 
-export const createPost = async (props: {
-    userId: string,
-    question: string,
-    tags: typeof PostTagEnum,
-    topic: typeof PostTopicEnum
-}) => {
+type CreatePostProps = {
+    userId: string;
+    question: string;
+    tags: keyof typeof PostTagEnum | Array<keyof typeof PostTagEnum>;
+    topic: keyof typeof PostTopicEnum | Array<keyof typeof PostTopicEnum>;
+};
+
+export const createPost = async (props: CreatePostProps) => {
     const user = await User.findById(props.userId);
+    if (!user) throw new ApiError(ERRORS.USER_NOT_FOUND);
 
-    if (!user) throw new ApiError(404, "NOT FOUND");
+    const isGuide = user.role === "GUIDE";
 
-    const isGuide = user.role == "GUIDE";
-
-    const post = await postModel.create({
-        user: user.id,
-        isGuide: isGuide,
-        ...props
-    });
+    const post = await postModel.create({ user: user._id, isGuide: isGuide, question: props.question });
 
     return post;
-}
+};
 
 export const likePost = async (props: { userId: string; postId: string }) => {
     const user = await User.findById(props.userId);
-    if (!user) throw new ApiError(404, "USER_NOT_FOUND");
+    if (!user) throw new ApiError(ERRORS.USER_NOT_FOUND);
 
     const post = await postModel.findById(props.postId);
-    if (!post) throw new ApiError(404, "POST_NOT_FOUND");
+    if (!post) throw new ApiError(ERRORS.POST_NOT_FOUND);
 
     const alreadyLiked = post.likes.some(
-        (l) => l.user && l.user.equals(props.userId)
+        (like) => like.user && like.user.equals(props.userId)
     );
 
     if (alreadyLiked) {
@@ -41,13 +39,14 @@ export const likePost = async (props: { userId: string; postId: string }) => {
     } else {
         post.likes.push({ user: props.userId });
     }
+
     await post.save();
 
     const updatedPost = await postModel.findById(props.postId).lean();
 
     return {
         liked: !alreadyLiked,
-        totalLikes: updatedPost!.likes.length,
+        totalLikes: updatedPost?.likes.length ?? 0,
     };
 };
 
@@ -57,10 +56,10 @@ export const addCommentToPost = async (props: {
     answer: string;
 }) => {
     const user = await User.findById(props.userId);
-    if (!user) throw new ApiError(404, 'USER_NOT_FOUND');
+    if (!user) throw new ApiError(ERRORS.USER_NOT_FOUND);
 
     const post = await postModel.findById(props.postId);
-    if (!post) throw new ApiError(404, 'POST_NOT_FOUND');
+    if (!post) throw new ApiError(ERRORS.POST_NOT_FOUND);
 
     post.replies.push({
         user: props.userId,
@@ -76,37 +75,39 @@ export const addCommentToPost = async (props: {
 };
 
 export const getPostById = async (postId: string) => {
-    const post = await postModel.findById(postId).populate([{
-        path: 'replies.user',
-        select: 'firstName lastName profilePictureUrl role',
-    }, {
-        path: 'user',
-        select: 'firstName lastName profilePictureUrl role',
-    }
+    const post = await postModel.findById(postId).populate([
+        {
+            path: "replies.user",
+            select: "firstName lastName profilePictureUrl role",
+        },
+        {
+            path: "user",
+            select: "firstName lastName profilePictureUrl role",
+        },
     ]);
 
-
-    if (!post) throw new ApiError(404, 'POST_NOT_FOUND');
+    if (!post) throw new ApiError(ERRORS.POST_NOT_FOUND);
 
     return post;
 };
 
 export const getAllPosts = async (userId: string) => {
-    const posts = await postModel.find().populate({
-        path: "user",
-        select: "firstName lastName profilePictureUrl"
-    }).lean();
+    const posts = await postModel
+        .find()
+        .populate({
+            path: "user",
+            select: "firstName lastName profilePictureUrl",
+        })
+        .lean();
 
-    if (!posts) throw new ApiError(404, 'POST_NOT_FOUND');
+    if (!posts) throw new ApiError(ERRORS.POST_NOT_FOUND);
 
-    const postsWithLikeState: any = posts.map((post) => ({
+    const postsWithLikeState = posts.map((post) => ({
         ...post,
-        hasLiked: post.likes.some((like: any) => {
-            return like.user.toString() === userId
-        }),
+        hasLiked: post.likes.some(
+            (like: any) => like.user.toString() === userId.toString()
+        ),
     }));
-
-
 
     return postsWithLikeState;
 };

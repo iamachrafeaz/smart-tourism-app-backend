@@ -1,4 +1,4 @@
-import { chooseUserRole, completeAccount, updateProfilePhoto } from "../services/user.service";
+import { chooseUserRole, completeAccount, getMe, updateProfilePhoto } from "../services/user.service";
 import ApiError from "../utils/ApiError";
 
 export const completeAccountRequest = async (req: any, res: any, next: any) => {
@@ -33,7 +33,7 @@ export const chooseUserRoleRequest = async (req: any, res: any, next: any) => {
 
 export const updateProfilePhotoRequest = async (req: any, res: any, next: any) => {
     try {
-        if (!req.file) throw new ApiError(400, "PHOTO_REQUIRED");
+        //  if (!req.file) throw new ApiError(400, "PHOTO_REQUIRED");
 
         const userId = req.user.id;
         const photoPath = `/uploads/profile/${req.file.filename}`;
@@ -48,3 +48,14 @@ export const updateProfilePhotoRequest = async (req: any, res: any, next: any) =
         next(err)
     }
 };
+
+
+export const getMeRequest = async (req: any, res: any, next: any) => {
+    const userId = req.user.id;
+    const user = await getMe(userId);
+
+    res.json({
+        success: true,
+        user
+    })
+}
