@@ -34,7 +34,7 @@ export const registerService = async (email: string, password: string) => {
 
     return {
         registrationToken: reg._id,
-        registrationState: { currentStep: reg.step }
+        registrationState: reg.step
     }
 };
 

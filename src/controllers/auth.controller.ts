@@ -50,7 +50,7 @@ export const checkVerificationCodeRequest = async (req: any, res: any, next: any
 export const completeProfileRequest = async (req: any, res: any, next: any) => {
     const registrationToken = req.body.registrationToken;
     const data = JSON.parse(req.body.data);
-    const filePath = req.file.path || null;
+    const filePath = req.file?.path || null;
 
     try {
         const { registrationState } = await completeProfile(registrationToken, data, filePath);

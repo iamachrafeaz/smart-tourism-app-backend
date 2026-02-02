@@ -77,7 +77,6 @@ router.post(
     }
 );
 
-
 router.get(
     "/test-token",
     authenticate,
