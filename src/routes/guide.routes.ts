@@ -1,5 +1,5 @@
 import express from "express";
-import { completeGuideProfileRequest, getAllGuidesRequest, getGuideByIdRequest } from "../controllers/guide.controller";
+import * as guideController from "../controllers/guide.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { authorize } from "../middlewares/role.middleware";
 import { uploadGuideDocs } from "../middlewares/uploadGuideDoc";
@@ -15,14 +15,20 @@ router.post(
         { name: "govId", maxCount: 1 },
         { name: "certifications", maxCount: 5 },
     ]),
-    completeGuideProfileRequest
+    guideController.completeGuideProfileRequest
 );
 
 router.get("/",
-    getAllGuidesRequest
+    guideController.getAllGuidesRequest
 );
 
-router.get("/:id", getGuideByIdRequest);
+router.get("/me",
+    authenticate,
+    authorize("GUIDE"),
+    guideController.getGuideMeRequest
+)
+
+router.get("/:id", guideController.getGuideByIdRequest);
 
 
 export default router;

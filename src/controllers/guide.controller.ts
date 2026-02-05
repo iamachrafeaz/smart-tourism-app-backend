@@ -1,4 +1,5 @@
-import { completeGuideProfile, getAllGuides, getGuideById } from "../services/guide.service";
+import { success } from "zod";
+import * as guideService from "../services/guide.service";
 import { guideProfileView, guidesList } from "../views/guide.view";
 
 export const completeGuideProfileRequest = async (req: any, res: any, next: any) => {
@@ -16,7 +17,7 @@ export const completeGuideProfileRequest = async (req: any, res: any, next: any)
 
         const user = req.user;
 
-        await completeGuideProfile(user.id, languages, description, expertise, fee, city, selfiePath, idPath, certificationsPaths);
+        await guideService.completeGuideProfile(user.id, languages, description, expertise, fee, city, selfiePath, idPath, certificationsPaths);
 
         res.status(200).json({
             success: true
@@ -26,9 +27,23 @@ export const completeGuideProfileRequest = async (req: any, res: any, next: any)
     }
 }
 
+export const getGuideMeRequest = async (req: any, res: any, next: any) => {
+    try {
+        const userId = req.user.id;
+        const guide = await guideService.getGuideMe(userId);
+
+        res.json({
+            success: true,
+            data: guide
+        });
+    } catch (error) {
+        next(error)
+    }
+}
+
 export const getAllGuidesRequest = async (req: any, res: any, next: any) => {
     try {
-        const guides = await getAllGuides();
+        const guides = await guideService.getAllGuides();
 
         let responseData = guidesList(guides);
         console.log(guides);
@@ -41,18 +56,9 @@ export const getAllGuidesRequest = async (req: any, res: any, next: any) => {
 export const getGuideByIdRequest = async (req: any, res: any, next: any) => {
     try {
         const { id } = req.params;
-        const guideProfile = await getGuideById(id);
+        const guideProfile = await guideService.getGuideById(id);
 
         let responseData;
-
-        // switch (userRole) {
-        //     case "ADMIN":
-        //         responseData = guideProfileView(guideProfile)
-        //     case "GUIDE":
-        //         responseData = guideProfileView(guideProfile)
-        //     default:
-        //         responseData = guideProfileView(guideProfile)
-        // }
 
         responseData = guideProfileView(guideProfile)
 

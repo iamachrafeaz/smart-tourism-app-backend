@@ -1,9 +1,6 @@
 import { getMe, updateProfilePhoto } from "../services/user.service";
 import ApiError from "../utils/ApiError";
 
-
-
-
 export const updateProfilePhotoRequest = async (req: any, res: any, next: any) => {
     try {
         //  if (!req.file) throw new ApiError(400, "PHOTO_REQUIRED");
@@ -22,13 +19,16 @@ export const updateProfilePhotoRequest = async (req: any, res: any, next: any) =
     }
 };
 
-
 export const getMeRequest = async (req: any, res: any, next: any) => {
     const userId = req.user.id;
     const user = await getMe(userId);
+    const { _id, ...rest } = user
 
     res.json({
         success: true,
-        user
+        user: {
+            id: _id,
+            ...rest
+        }
     })
 }

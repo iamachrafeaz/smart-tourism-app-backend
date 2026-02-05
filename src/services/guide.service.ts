@@ -1,14 +1,14 @@
 import mongoose, { Types } from "mongoose";
-import Guide from "../models/guide.model";
 import Review from "../models/review.model";
 import Tour from "../models/tour.model";
 import { getTopReviewsByGuide } from "./review.service";
 import ApiError from "../utils/ApiError";
 import { ERRORS } from "../../constants/error.constants";
 import cityModel from "../models/city.model";
+import guideModel from "../models/guide.model";
 
 export const createGuide = async (userId: string) => {
-    return await Guide.create({
+    return await guideModel.create({
         user: userId,
         verificationStatus: "UNVERIFIED",
     });
@@ -27,7 +27,7 @@ export const completeGuideProfile = async (
 
 ) => {
 
-    const user = await Guide.findOne({ user: userId });
+    const user = await guideModel.findOne({ user: userId });
     if (!user) throw new ApiError(ERRORS.USER_NOT_FOUND);
     if (user.verificationStatus !== "UNVERIFIED") throw new ApiError(ERRORS.INVALID_STEP);
 
@@ -54,9 +54,14 @@ export const completeGuideProfile = async (
     return
 }
 
+export const getGuideMe = async (userId: string) => {
+    console.log(userId)
+    const guide = await guideModel.findOne({ user: userId }).lean();
+    return guide;
+}
 
 export const getGuideById = async (guideId: string) => {
-    const guide = await Guide.findById(guideId)
+    const guide = await guideModel.findById(guideId)
         .populate([
             { path: "user", select: "firstName lastName profilePictureUrl -_id" },
             { path: "city", select: "name -_id" }
@@ -70,7 +75,7 @@ export const getGuideById = async (guideId: string) => {
 }
 
 export const getAllGuides = async () => {
-    const guides = await Guide.aggregate([
+    const guides = await guideModel.aggregate([
         {
             $lookup: {
                 from: "users",
@@ -116,7 +121,6 @@ export const getAllGuides = async () => {
     return guides;
 };
 
-
 export const updateGuideRating = async (guideId: string) => {
     const stats = await Review.aggregate([
         { $match: { guide: new Types.ObjectId(guideId) } },
@@ -132,7 +136,7 @@ export const updateGuideRating = async (guideId: string) => {
     const avgRating = stats[0]?.avgRating || 0;
     const reviewsCount = stats[0]?.reviewsCount || 0;
 
-    await Guide.findByIdAndUpdate(guideId, {
+    await guideModel.findByIdAndUpdate(guideId, {
         rating: Number(avgRating.toFixed(1)), // 4.666 → 4.7
         reviewsCount
     });
