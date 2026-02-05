@@ -1,12 +1,27 @@
 import multer from "multer";
 import fs from "fs";
-import path from "path";
 
 const ensureDir = (dir: string) => {
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
     }
 };
+
+const mimeToExt = {
+    "image/jpeg": ".jpg",
+    "image/png": ".png",
+    "image/webp": ".webp",
+    "image/heic": ".heic",
+} as const;
+
+type SupportedMime = keyof typeof mimeToExt;
+
+function getExt(mime: string) {
+    if (mime in mimeToExt) {
+        return mimeToExt[mime as SupportedMime];
+    }
+    return "";
+}
 
 const storage = multer.diskStorage({
     destination: (req, file, callback) => {
@@ -24,7 +39,7 @@ const storage = multer.diskStorage({
         callback(null, uploadPath);
     },
     filename(req, file, callback) {
-        const ext = path.extname(file.originalname);
+        const ext = getExt(file.mimetype);
         const fileName = `${file.fieldname}-${Date.now()}${ext}`;
         callback(null, fileName)
     },

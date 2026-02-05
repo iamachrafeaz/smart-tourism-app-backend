@@ -14,41 +14,24 @@ import { uploadProfilePhoto } from "../middlewares/uploadProfilePhoto";
 
 const router = Router();
 
-/**
- * @route   POST /api/auth/register
- * @desc    Register user & send verification code
- * @access  Public
- */
 router.post(
     "/register/start",
     validate(registerSchema),
     registerRequest
 );
 
-/**
- * @route   POST /api/auth/login
- * @desc    Login user
- * @access  Public
- */
 router.post(
     "/login",
     validate(loginSchema),
     loginRequest
 );
 
-/**
- * @route   POST /api/auth/verify
- * @desc    Verify email with code
- */
+
 router.post(
     "/register/verify-email",
     checkVerificationCodeRequest
 );
 
-/**
- * @route   POST /api/auth/resend-code
- * @desc    Resend verification code
- */
 router.post(
     "/register/resend-otp",
     resendVerificationCodeRequest
@@ -76,13 +59,6 @@ router.post(
         res.json({ data })
     }
 );
-
-router.get(
-    "/test-token",
-    authenticate,
-    async (req: any, res: any) => {
-        res.status(201).json({ message: req.user.role });
-    })
 
 export default router;
 
